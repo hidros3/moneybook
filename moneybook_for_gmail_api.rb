@@ -13,7 +13,6 @@ results = client.execute!(
   :api_method => gmail_api.users.messages.list,
   :parameters => { :userId => 'me', :q => 'from:dailyreport@samsungcard.com' })
 
-puts "Mail ID:"
 puts "No labels found" if results.data.messages.empty?
 
 results.data.messages.each do |message|
@@ -22,5 +21,4 @@ results.data.messages.each do |message|
     :parameters => { :userId => 'me', :id => "#{message.id}" })
     encoded_details = Base64.urlsafe_decode64(JSON.parse(details.data.to_json)["payload"]["body"]["data"])
     puts encoded_details
-    break
 end
