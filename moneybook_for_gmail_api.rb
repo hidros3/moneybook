@@ -15,10 +15,14 @@ results = client.execute!(
 
 puts "No labels found" if results.data.messages.empty?
 
-results.data.messages.each do |message|
-  details = client.execute!(
-    :api_method => gmail_api.users.messages.get,
-    :parameters => { :userId => 'me', :id => "#{message.id}" })
-    encoded_details = Base64.urlsafe_decode64(JSON.parse(details.data.to_json)["payload"]["body"]["data"])
-    puts encoded_details
+begin
+	results.data.messages.each do |message|
+	  details = client.execute!(
+	    :api_method => gmail_api.users.messages.get,
+	    :parameters => { :userId => 'me', :id => "#{message.id}" })
+	    encoded_details = Base64.urlsafe_decode64(JSON.parse(details.data.to_json)["payload"]["body"]["data"])
+	    puts encoded_details
+	end
+rescue => e
+	puts e.message
 end
