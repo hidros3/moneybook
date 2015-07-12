@@ -6,3 +6,9 @@
 * Get your emails.
 * Parse it.
 * Track your expense.
+
+## How to work
+* Get Email list
+* Check email ids whether already in done email ids or not.
+* When email id is fresh, get detail of an email
+* And then write csv file.
