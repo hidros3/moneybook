@@ -36,10 +36,9 @@ begin
 		    	encoded_details = Base64.urlsafe_decode64(JSON.parse(details.data.to_json)["payload"]["body"]["data"])
 		    end
 		  puts encoded_details
+		  @mails.save
 	  end	  
 	end
 rescue => e
 	puts "#{e.message}"
 end
-
-@mails.save
