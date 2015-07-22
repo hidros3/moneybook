@@ -4,10 +4,10 @@ require 'sequel'
 
 DB = Sequel.connect("postgres://localhost/moneybookdb")
 
-# DB.create_table :mails do
-# 	primary_key :id
-# 	String :mail_id
-# end
+DB.create_table :mails do
+	primary_key :id
+	String :mail_id
+end
 
 DB.create_table :spends do
 	primary_key :id
