@@ -46,9 +46,9 @@ class MoneyBook < Google::APIClient
     @lists = @client.execute!(
     :api_method => @gmail_api.users.messages.list,
     :parameters => { :userId => 'me', :q => 'from:dailyreport@samsungcard.com' })
-    
+
     @html = []
-    
+
     @lists.data.messages.each do |list|
       begin
         unless @mails.where( :mail_id => list.id ).any?
@@ -56,7 +56,7 @@ class MoneyBook < Google::APIClient
           @message = @client.execute!(
           :api_method => @gmail_api.users.messages.get,
           :parameters => { :userId => 'me', :id => list.id })
-          
+
           if JSON.parse(@message.data.to_json)["payload"]["body"]["data"]
             @encoded_message = Base64.urlsafe_decode64(JSON.parse(@message.data.to_json)["payload"]["body"]["data"])
           end
@@ -67,17 +67,16 @@ class MoneyBook < Google::APIClient
       rescue Exception => e
         puts "exception"
       end
-    end    
-    
+    end
+
     @html.each do |h|
       doc = Nokogiri::HTML::Document.parse(h.to_s, nil, "UTF-8")
-      
+
       data = doc.css('body table td tr table tr').map(&:text)
-      
+
       data.each do |d|
         row = d.gsub(/[[:blank:]]/,'').gsub(",","").gsub("\r\n", ',').gsub(/\A,|,\Z/,'').split(',')
-        if row.grep(/\A\d\d-\d\d/).any? 
-          p row 
+        if row.grep(/\A\d\d-\d\d/).any?
           @spends.insert( :date => row[0],
                           :time => row[1],
                           :type => row[2],
