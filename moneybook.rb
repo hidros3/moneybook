@@ -47,8 +47,6 @@ class MoneyBook < Google::APIClient
     :api_method => @gmail_api.users.messages.list,
     :parameters => { :userId => 'me', :q => 'from:dailyreport@samsungcard.com' })
 
-    @html = []
-
     @lists.data.messages.each do |list|
       begin
         unless @mails.where( :mail_id => list.id ).any?
@@ -58,42 +56,31 @@ class MoneyBook < Google::APIClient
           :parameters => { :userId => 'me', :id => list.id })
 
           if JSON.parse(@message.data.to_json)["payload"]["body"]["data"]
-            @encoded_message = Base64.urlsafe_decode64(JSON.parse(@message.data.to_json)["payload"]["body"]["data"])
+            encoded_message = Base64.urlsafe_decode64(JSON.parse(@message.data.to_json)["payload"]["body"]["data"])
+            doc = Nokogiri::HTML::Document.parse(encoded_message.to_s, nil, "UTF-8").css('body table td tr table tr').map(&:text)
+            doc.each do |d|
+              row = d.gsub(/[[:blank:]]/,'').gsub(",","").gsub("\r\n", ',').gsub(/\A,|,\Z/,'').split(',')
+              if row.grep(/\A\d\d-\d\d/).any?
+                @spends.insert( :date => row[0],
+                                :time => row[1],
+                                :type => row[2],
+                                :user => row[3],
+                                :card_name => row[4],
+                                :card_num => row[5],
+                                :store_name => row[6],
+                                :price => row[7],
+                                :installation => row[8] ,
+                                :success => row[9]
+                                )
+              end
+            end
           end
-
-          @html << @encoded_message
-
         end
-      rescue Exception => e
+      rescue Exception
         puts "exception"
       end
     end
-
-    @html.each do |h|
-      doc = Nokogiri::HTML::Document.parse(h.to_s, nil, "UTF-8")
-
-      data = doc.css('body table td tr table tr').map(&:text)
-
-      data.each do |d|
-        row = d.gsub(/[[:blank:]]/,'').gsub(",","").gsub("\r\n", ',').gsub(/\A,|,\Z/,'').split(',')
-        if row.grep(/\A\d\d-\d\d/).any?
-          @spends.insert( :date => row[0],
-                          :time => row[1],
-                          :type => row[2],
-                          :user => row[3],
-                          :card_name => row[4],
-                          :card_num => row[5],
-                          :store_name => row[6],
-                          :price => row[7],
-                          :installation => row[8] ,
-                          :success => row[9]
-                          )
-        end
-      end
-    end
   end
-
-
 end
 
 m = MoneyBook.new
