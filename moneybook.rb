@@ -74,7 +74,7 @@ class MoneyBook < Google::APIClient
             doc.each do |d|
               row = d.gsub(/[[:blank:]]/, '').gsub(',', '').gsub("\r\n", ',').gsub(/\A,|,\Z/, '').split(',')
               if row.grep(/\A\d\d-\d\d/).any?
-                @spends.insert(date: row[0],
+                @spends.insert(date: "#{Time.now.year}-#{row[0]}",
                                time: row[1],
                                type: row[2],
                                user: row[3],
@@ -95,6 +95,7 @@ class MoneyBook < Google::APIClient
     end
   end
 end
-
+puts "Started"
 m = MoneyBook.new
 m.gets
+puts "Done"

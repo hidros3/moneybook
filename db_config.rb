@@ -11,7 +11,7 @@ end
 
 DB.create_table :spends do
 	primary_key :id
-	String 	:date
+	Date 	:date
 	String 	:time
 	String 	:type
 	String 	:user
